@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 
 import rospy
-from std_msgs.msg import String
+from bonus_pkg.msg import node1message  # Custom message for Node 1
+from bonus_pkg.msg import node2message   # Custom message for Node 2
 
-def callback(data):
-    # Check if the message is not from this node
-    if data._connection_header['callerid'] != rospy.get_name():
-        rospy.loginfo("[%s] Received: %s", rospy.get_name(), data.data)
+def callback(msg):
+    rospy.loginfo(f"Node1 received: {msg.message2}")
 
 def node1():
-    rospy.init_node('chat_node1', anonymous=True)
-    
-    pub = rospy.Publisher('chat_bot', String, queue_size=10)
-    rospy.Subscriber('chat_bot', String, callback)
-    
-    rate = rospy.Rate(10)  # 10hz
+    rospy.init_node('node1', anonymous=True)
+
+    pub = rospy.Publisher('chat', node1message, queue_size=10)
+    rospy.Subscriber('chat', node2message, callback)
+
+    rate = rospy.Rate(1)  # 1 Hz
     while not rospy.is_shutdown():
-        msg = input("[%s] Enter a message: " % rospy.get_name())
-        rospy.loginfo("[%s] Publishing: %s", rospy.get_name(), msg)
+        msg = node1message()
+        msg.message1 = input("Node 1 getting input")
+        rospy.loginfo("Node1 sending: " + msg.message1)
         pub.publish(msg)
         rate.sleep()
 
